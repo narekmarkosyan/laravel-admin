@@ -21,7 +21,7 @@ class Expand extends AbstractDisplayer
             $async = true;
             $loadGrid = is_subclass_of($callback, Simple::class);
         } else {
-            $html = call_user_func_array($callback->bindTo($this->row), [$this->row]);
+            $html = call_user_func_array($this->bindRowClosure($callback), [$this->row]);
         }
 
         return Admin::component('admin::components.column-expand', [

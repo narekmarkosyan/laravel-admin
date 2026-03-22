@@ -2,6 +2,7 @@
 
 namespace Encore\Admin\Grid\Displayers;
 
+use Closure;
 use Encore\Admin\Grid;
 use Encore\Admin\Grid\Column;
 use Illuminate\Database\Eloquent\Model;
@@ -112,6 +113,20 @@ abstract class AbstractDisplayer
     public function getClassName()
     {
         return $this->getColumn()->getClassName();
+    }
+
+    /**
+     * Preserve current rebinding behavior for normal closures,
+     * but leave static closures untouched because PHP 8.5 warns
+     * and PHP 9 will reject binding them.
+     */
+    protected function bindRowClosure(Closure $callback): Closure
+    {
+        if ((new \ReflectionFunction($callback))->isStatic()) {
+            return $callback;
+        }
+
+        return $callback->bindTo($this->row);
     }
 
     /**

@@ -101,10 +101,38 @@ class Row
     {
         $attrArr = [];
         foreach ($attributes as $name => $val) {
+            $val = $this->normalizeHtmlAttributeValue($val);
+
             $attrArr[] = "$name=\"$val\"";
         }
 
         return implode(' ', $attrArr);
+    }
+
+    /**
+     * @param mixed $value
+     *
+     * @return string
+     */
+    private function normalizeHtmlAttributeValue($value)
+    {
+        if (is_array($value)) {
+            $value = collect($value)->flatten()->map(function ($item) {
+                return is_scalar($item) || $item instanceof \Stringable ? (string) $item : null;
+            })->filter(function ($item) {
+                return !is_null($item) && $item !== '';
+            })->implode(' ');
+        }
+
+        if ($value instanceof \Stringable) {
+            return (string) $value;
+        }
+
+        if (is_scalar($value)) {
+            return (string) $value;
+        }
+
+        return '';
     }
 
     /**

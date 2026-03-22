@@ -43,7 +43,7 @@ class Modal extends AbstractDisplayer
         if ($async = is_subclass_of($callback, Renderable::class)) {
             $this->renderable = $callback;
         } else {
-            $html = call_user_func_array($callback->bindTo($this->row), [$this->row]);
+            $html = call_user_func_array($this->bindRowClosure($callback), [$this->row]);
         }
 
         return Admin::component('admin::components.column-modal', [

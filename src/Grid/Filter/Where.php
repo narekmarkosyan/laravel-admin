@@ -70,6 +70,18 @@ class Where extends AbstractFilter
 
         $this->input = $this->value = $value;
 
-        return $this->buildCondition($this->where->bindTo($this));
+        return $this->buildCondition($this->bindWhereCallback($this->where));
+    }
+
+    /**
+     * Static closures cannot be rebound in PHP 8.5+.
+     */
+    protected function bindWhereCallback(\Closure $callback): \Closure
+    {
+        if ((new \ReflectionFunction($callback))->isStatic()) {
+            return $callback;
+        }
+
+        return $callback->bindTo($this);
     }
 }

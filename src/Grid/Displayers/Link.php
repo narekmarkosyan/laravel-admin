@@ -7,7 +7,7 @@ class Link extends AbstractDisplayer
     public function display($callback = '', $target = '_blank')
     {
         if ($callback instanceof \Closure) {
-            $callback = $callback->bindTo($this->row);
+            $callback = $this->bindRowClosure($callback);
             $href = call_user_func_array($callback, [$this->row]);
         } else {
             $href = $callback ?: $this->value;

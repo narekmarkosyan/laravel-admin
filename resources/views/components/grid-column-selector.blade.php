@@ -9,16 +9,28 @@
             <ul>
                 @foreach($columns as $key => $label)
                 @php
+                $columnKey = is_array($key)
+                    ? collect($key)->flatten()->map(function ($item) {
+                        return is_scalar($item) || $item instanceof \Stringable ? (string) $item : null;
+                    })->filter()->implode('.')
+                    : (string) $key;
+
+                $columnLabel = is_array($label)
+                    ? collect($label)->flatten()->map(function ($item) {
+                        return is_scalar($item) || $item instanceof \Stringable ? (string) $item : null;
+                    })->filter()->implode(' ')
+                    : (is_scalar($label) || $label instanceof \Stringable ? (string) $label : '');
+
                 if (empty($visible)) {
                     $checked = 'checked';
                 } else {
-                    $checked = in_array($key, $visible) ? 'checked' : '';
+                    $checked = in_array($columnKey, $visible) ? 'checked' : '';
                 }
                 @endphp
 
                 <li class="checkbox icheck">
                     <label>
-                        <input type="checkbox" class="column-select-item" value="{{ $key }}" {{ $checked }}/>&nbsp;&nbsp;&nbsp;{{ $label }}
+                        <input type="checkbox" class="column-select-item" value="{{ $columnKey }}" {{ $checked }}/>&nbsp;&nbsp;&nbsp;{{ $columnLabel }}
                     </label>
                 </li>
                 @endforeach

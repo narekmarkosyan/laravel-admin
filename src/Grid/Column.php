@@ -226,10 +226,38 @@ class Column
     {
         $attrArr = [];
         foreach (static::getAttributes($this->name) as $name => $val) {
+            $val = $this->normalizeHtmlAttributeValue($val);
+
             $attrArr[] = "$name=\"$val\"";
         }
 
         return implode(' ', $attrArr);
+    }
+
+    /**
+     * @param mixed $value
+     *
+     * @return string
+     */
+    protected function normalizeHtmlAttributeValue($value)
+    {
+        if (is_array($value)) {
+            $value = collect($value)->flatten()->map(function ($item) {
+                return is_scalar($item) || $item instanceof \Stringable ? (string) $item : null;
+            })->filter(function ($item) {
+                return !is_null($item) && $item !== '';
+            })->implode(' ');
+        }
+
+        if ($value instanceof \Stringable) {
+            return (string) $value;
+        }
+
+        if (is_scalar($value)) {
+            return (string) $value;
+        }
+
+        return '';
     }
 
     /**
@@ -539,6 +567,10 @@ class Column
     protected function bindOriginalRowModel(Closure $callback, $key)
     {
         $rowModel = static::$originalGridModels[$key];
+
+        if ((new \ReflectionFunction($callback))->isStatic()) {
+            return $callback;
+        }
 
         return $callback->bindTo($rowModel);
     }

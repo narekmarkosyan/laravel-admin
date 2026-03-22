@@ -346,22 +346,164 @@ trait UploadField
     protected function getStoreName(UploadedFile $file)
     {
         if ($this->useUniqueName) {
-            return $this->generateUniqueName($file);
+            $name = $this->generateUniqueName($file);
+        } elseif ($this->useSequenceName) {
+            $name = $this->generateSequenceName($file);
+        } elseif ($this->name instanceof \Closure) {
+            $name = $this->name->call($this, $file);
+        } elseif (is_string($this->name)) {
+            $name = $this->name;
+        } else {
+            $name = $file->getClientOriginalName();
         }
 
-        if ($this->useSequenceName) {
-            return $this->generateSequenceName($file);
+        return $this->sanitizeStoreName($file, $name);
+    }
+
+    /**
+     * Normalize the store name before persisting the uploaded file.
+     *
+     * @param UploadedFile $file
+     * @param mixed        $name
+     *
+     * @return string
+     */
+    protected function sanitizeStoreName(UploadedFile $file, $name)
+    {
+        $name = trim(str_replace("\0", '', (string) $name));
+        $name = basename(str_replace('\\', '/', $name));
+
+        if ($name === '' || $name === '.' || $name === '..') {
+            $name = md5(uniqid());
         }
 
-        if ($this->name instanceof \Closure) {
-            return $this->name->call($this, $file);
+        if (!$this->usesDetectedImageExtension()) {
+            return $name;
         }
 
-        if (is_string($this->name)) {
-            return $this->name;
+        return $this->replaceExtension(
+            $name,
+            $this->resolveImageExtension($file, $name)
+        );
+    }
+
+    /**
+     * Only image uploads should stop trusting dangerous user supplied extensions.
+     *
+     * @return bool
+     */
+    protected function usesDetectedImageExtension()
+    {
+        return $this instanceof Image || $this instanceof MultipleImage;
+    }
+
+    /**
+     * Resolve a safe extension for an uploaded image.
+     *
+     * @param UploadedFile $file
+     * @param string       $name
+     *
+     * @return string
+     */
+    protected function resolveImageExtension(UploadedFile $file, $name)
+    {
+        $extension = strtolower(pathinfo($name, PATHINFO_EXTENSION));
+
+        if ($this->isSafeImageExtension($extension)) {
+            return $extension;
         }
 
-        return $file->getClientOriginalName();
+        $extension = $this->lastSafeImageExtension($name);
+
+        if ($extension) {
+            return $extension;
+        }
+
+        $extension = strtolower((string) $file->guessExtension());
+
+        if ($this->isSafeImageExtension($extension)) {
+            return $extension;
+        }
+
+        return '';
+    }
+
+    /**
+     * Extract the last safe image extension found anywhere in the file name.
+     *
+     * @param string $name
+     *
+     * @return string|null
+     */
+    protected function lastSafeImageExtension($name)
+    {
+        $parts = explode('.', strtolower($name));
+        array_shift($parts);
+
+        $parts = array_values(array_filter($parts, function ($extension) {
+            return $this->isSafeImageExtension($extension);
+        }));
+
+        if (empty($parts)) {
+            return;
+        }
+
+        return end($parts);
+    }
+
+    /**
+     * @param string $extension
+     *
+     * @return bool
+     */
+    protected function isSafeImageExtension($extension)
+    {
+        return in_array($extension, ['bmp', 'gif', 'jpeg', 'jpg', 'png', 'svg', 'webp'], true);
+    }
+
+    /**
+     * Replace the file extension while preserving the visible base name.
+     *
+     * @param string $name
+     * @param string $extension
+     *
+     * @return string
+     */
+    protected function replaceExtension($name, $extension)
+    {
+        $base = pathinfo($name, PATHINFO_FILENAME);
+
+        if ($base === '' || $base === '.' || $base === '..') {
+            $base = md5(uniqid());
+        }
+
+        if ($extension === '') {
+            return $base;
+        }
+
+        foreach ($this->equivalentExtensions($extension) as $candidate) {
+            if (preg_match('/\.'.preg_quote($candidate, '/').'$/i', $base)) {
+                return $base;
+            }
+        }
+
+        return "{$base}.{$extension}";
+    }
+
+    /**
+     * Handle equivalent image extensions such as jpg/jpeg.
+     *
+     * @param string $extension
+     *
+     * @return array
+     */
+    protected function equivalentExtensions($extension)
+    {
+        if (in_array($extension, ['jpeg', 'jpg'], true)) {
+            return ['jpeg', 'jpg'];
+        }
+
+        return [$extension];
     }
 
     /**

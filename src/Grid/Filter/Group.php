@@ -32,7 +32,7 @@ class Group extends AbstractFilter
      * @param string        $label
      * @param \Closure|null $builder
      */
-    public function __construct($column, $label = '', \Closure $builder = null)
+    public function __construct($column, $label = '', ?\Closure $builder = null)
     {
         $this->column = $column;
 
@@ -179,9 +179,21 @@ class Group extends AbstractFilter
     {
         $this->input = $this->value;
 
-        $condition = [$builder->bindTo($this)];
+        $condition = [$this->bindWhereCallback($builder)];
 
         return $this->joinGroup($label, $condition);
+    }
+
+    /**
+     * Static closures cannot be rebound in PHP 8.5+.
+     */
+    protected function bindWhereCallback(\Closure $callback): \Closure
+    {
+        if ((new \ReflectionFunction($callback))->isStatic()) {
+            return $callback;
+        }
+
+        return $callback->bindTo($this);
     }
 
     /**

@@ -53,6 +53,35 @@ class UserSettingTest extends TestCase
         $this->assertEquals('http://localhost:8000/uploads/images/test.jpg', $avatar);
     }
 
+    public function testUpdateAvatarDoesNotPersistDangerousExtension()
+    {
+        File::cleanDirectory(public_path('uploads/images'));
+
+        $file = new \Illuminate\Http\UploadedFile(
+            __DIR__.'/assets/test.jpg',
+            'shell.jpg.php',
+            'image/jpeg',
+            null,
+            true
+        );
+
+        $this->call(
+            'PUT',
+            '/admin/auth/setting',
+            ['name' => Administrator::first()->name],
+            [],
+            ['avatar' => $file]
+        );
+
+        $this->assertResponseStatus(302);
+        $this->assertRedirectedTo('/admin/auth/setting');
+
+        $avatar = Administrator::first()->getAttributes()['avatar'];
+
+        $this->assertEquals('images/shell.jpg', $avatar);
+        $this->assertFileExists(public_path('uploads/'.$avatar));
+    }
+
     public function testUpdatePasswordConfirmation()
     {
         $data = [

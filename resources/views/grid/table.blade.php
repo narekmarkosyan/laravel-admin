@@ -30,7 +30,20 @@
             <thead>
                 <tr>
                     @foreach($grid->visibleColumns() as $column)
-                    <th {!! $column->formatHtmlAttributes() !!}>{!! $column->getLabel() !!}{!! $column->renderHeader() !!}</th>
+                    @php
+                    $columnLabel = $column->getLabel();
+
+                    if (is_array($columnLabel)) {
+                        $columnLabel = collect($columnLabel)->flatten()->map(function ($item) {
+                            return is_scalar($item) || $item instanceof \Stringable ? (string) $item : null;
+                        })->filter(function ($item) {
+                            return !is_null($item) && $item !== '';
+                        })->implode(' ');
+                    } elseif (!is_null($columnLabel) && !is_scalar($columnLabel) && !$columnLabel instanceof \Stringable) {
+                        $columnLabel = '';
+                    }
+                    @endphp
+                    <th {!! $column->formatHtmlAttributes() !!}>{!! (string) $columnLabel !!}{!! $column->renderHeader() !!}</th>
                     @endforeach
                 </tr>
             </thead>

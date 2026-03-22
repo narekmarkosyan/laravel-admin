@@ -430,7 +430,9 @@ EOT;
 
         if ($this->options instanceof \Closure) {
             if ($this->form) {
-                $this->options = $this->options->bindTo($this->form->model());
+                if (!(new \ReflectionFunction($this->options))->isStatic()) {
+                    $this->options = $this->options->bindTo($this->form->model());
+                }
             }
 
             $this->options(call_user_func($this->options, $this->value, $this));
