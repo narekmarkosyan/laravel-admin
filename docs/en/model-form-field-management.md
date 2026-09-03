@@ -3,7 +3,7 @@
 
 ## Remove field
 
-The built-in `map` and `editor` fields requires the front-end files via cdn, and if there are problems with the network, they can be removed in the following ways
+The built-in `map` field requires front-end files via CDN, while the `editor` field ships its CKEditor assets with laravel-admin. If there are fields you do not need, they can be removed in the following ways.
 
 Locate the file `app/Admin/bootstrap.php`. If the file does not exist, update `laravel-admin` and create this file.
 

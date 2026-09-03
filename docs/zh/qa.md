@@ -20,7 +20,7 @@ app('view')->prependNamespace('admin', resource_path('views/admin'));
 
 `laravel-admin`默认引用了大量前端资源，如果有网络问题或者有不需要使用的组件，可以参考[form组件管理](/zh/model-form-field-management.md)将其移除。
 
-关于富文本编辑器，由于静态资源包文件普遍太大，所以`laravel-admin`默认通过cdn的方式引用`ckeditor`，建议大家根据自己的需求扩展编辑器，自行配置。
+关于富文本编辑器，`laravel-admin`默认发布并引用随包提供的`ckeditor`资源；也可以根据自己的需求扩展编辑器，自行配置。
 
 ## 关于前端资源问题
 

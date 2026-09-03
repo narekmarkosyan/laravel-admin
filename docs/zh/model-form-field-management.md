@@ -2,7 +2,7 @@
 
 ## 移除已有组件
 
-form表单内置的`map`和`editor`组件通过cdn的方式引用了前端文件，如果网络方面有问题，可以通过下面的方式将它们移除
+form表单内置的`map`组件通过cdn的方式引用了前端文件，`editor`组件的CKEditor资源随laravel-admin一起发布。如果有不需要使用的组件，可以通过下面的方式将它们移除
 
 找到文件`app/Admin/bootstrap.php`,如果文件不存在，请更新`laravel-admin`，然后新建该文件
 
