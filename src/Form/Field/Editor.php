@@ -12,7 +12,19 @@ class Editor extends Field
 
     public function render()
     {
-        $this->script = "CKEDITOR.replace('{$this->id}');";
+        $id = json_encode($this->id);
+
+        $this->script = <<<SCRIPT
+var editor = document.getElementById({$id});
+
+if (editor && editor.tagName.toLowerCase() === 'textarea') {
+    if (CKEDITOR.instances[editor.id]) {
+        CKEDITOR.instances[editor.id].destroy(true);
+    }
+
+    CKEDITOR.replace(editor);
+}
+SCRIPT;
 
         return parent::render();
     }
