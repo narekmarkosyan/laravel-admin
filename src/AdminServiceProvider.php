@@ -171,6 +171,10 @@ class AdminServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        $this->mergeConfigFrom(__DIR__.'/../config/admin.php', 'admin');
+
+        $this->registerUploadDisk();
+
         $this->loadAdminAuthConfig();
 
         $this->registerRouteMiddleware();
@@ -178,6 +182,25 @@ class AdminServiceProvider extends ServiceProvider
         $this->commands($this->commands);
 
         $this->macroRouter();
+    }
+
+    /**
+     * Provide the default public upload disk when the application has none.
+     *
+     * @return void
+     */
+    protected function registerUploadDisk()
+    {
+        if (config('admin.upload.disk') !== 'admin' || config()->has('filesystems.disks.admin')) {
+            return;
+        }
+
+        config()->set('filesystems.disks.admin', [
+            'driver' => 'local',
+            'root' => public_path('uploads'),
+            'visibility' => 'public',
+            'url' => rtrim((string) config('app.url'), '/').'/uploads',
+        ]);
     }
 
     /**

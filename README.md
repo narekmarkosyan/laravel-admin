@@ -51,16 +51,14 @@ Sponsor
 
 Requirements
 ------------
- - PHP >= 7.0.0
- - Laravel >= 5.5.0
+ - PHP >= 8.2 for Laravel 11 and 12; PHP >= 8.3 for Laravel 13
+ - Laravel 11, 12, or 13
  - Fileinfo PHP Extension
 
 Installation
 ------------
 
-> This package requires PHP 7+ and Laravel 5.5, for old versions please refer to [1.4](https://laravel-admin.org/docs/v1.4/#/)
-
-First, install laravel 5.5, and make sure that the database connection settings are correct.
+Install a supported Laravel version and make sure the database connection settings are correct.
 
 ```
 composer require encore/laravel-admin
@@ -72,6 +70,8 @@ Then run these commands to publish assets and config：
 php artisan vendor:publish --provider="Encore\Admin\AdminServiceProvider"
 ```
 After run command you can find config file in `config/admin.php`, in this file you can change the install directory,db connection or table names.
+
+The default `admin` upload disk stores files in `public/uploads`. Set `APP_URL` to the public URL of your application so uploaded file links are correct. To use another location or storage service, define `filesystems.disks.admin` in `config/filesystems.php`, or change `admin.upload.disk` to a disk already configured there.
 
 At last run following command to finish install.
 ```

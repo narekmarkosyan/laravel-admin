@@ -1,9 +1,10 @@
 @if(Session::has('toastr'))
     @php
         $toastr     = Session::pull('toastr');
-        $type       = \Illuminate\Support\Arr::get($toastr->get('type'), 0, 'success');
-        $message    = \Illuminate\Support\Arr::get($toastr->get('message'), 0, '');
-        $options    = json_encode($toastr->get('options', []));
+        $toastr     = $toastr instanceof \Illuminate\Support\MessageBag ? $toastr->toArray() : $toastr;
+        $type       = \Illuminate\Support\Arr::wrap(\Illuminate\Support\Arr::get($toastr, 'type'))[0] ?? 'success';
+        $message    = \Illuminate\Support\Arr::wrap(\Illuminate\Support\Arr::get($toastr, 'message'))[0] ?? '';
+        $options    = json_encode(\Illuminate\Support\Arr::get($toastr, 'options', []));
     @endphp
     <script>
         $(function () {

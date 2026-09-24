@@ -1,0 +1,36 @@
+name: Laravel compatibility
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - laravel: '11.0'
+            php: '8.2'
+          - laravel: '12.0'
+            php: '8.2'
+          - laravel: '13.0'
+            php: '8.3'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: dom, mbstring
+          coverage: none
+      - name: Install dependencies
+        run: composer update --with "laravel/framework:^${{ matrix.laravel }}" --prefer-dist --no-interaction --no-progress --no-scripts
+      - name: Check PHP syntax
+        run: find src tests/Unit -name '*.php' -print0 | xargs -0 -n1 php -l
+      - name: Run compatibility tests
+        run: vendor/bin/phpunit tests/Unit
+      - name: Verify production PJAX dependencies
+        run: |
+          composer install --no-dev --prefer-dist --no-interaction --no-progress --no-scripts
+          php -r 'require "vendor/autoload.php"; $crawler = new Symfony\Component\DomCrawler\Crawler("<div id=\"pjax\">ok</div>"); exit($crawler->filter("#pjax")->text() === "ok" ? 0 : 1);'

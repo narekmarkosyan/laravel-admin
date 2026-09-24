@@ -152,7 +152,7 @@ return [
     */
     'upload' => [
 
-        // Disk in `config/filesystem.php`.
+        // Defaults to public/uploads; define filesystems.disks.admin to customize it.
         'disk' => 'admin',
 
         // Image and file upload path under the disk above.

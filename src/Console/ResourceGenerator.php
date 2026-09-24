@@ -23,17 +23,6 @@ class ResourceGenerator
     /**
      * @var array
      */
-    private $doctrineTypeMapping = [
-        'string' => [
-            'enum', 'geometry', 'geometrycollection', 'linestring',
-            'polygon', 'multilinestring', 'multipoint', 'multipolygon',
-            'point',
-        ],
-    ];
-
-    /**
-     * @var array
-     */
     protected $fieldTypeMapping = [
         'ip'       => 'ip',
         'email'    => 'email|mail',
@@ -83,12 +72,12 @@ class ResourceGenerator
         $output = '';
 
         foreach ($this->getTableColumns() as $column) {
-            $name = $column->getName();
+            $name = $column['name'];
             if (in_array($name, $reservedColumns)) {
                 continue;
             }
-            $type = $column->getType()->getName();
-            $default = $column->getDefault();
+            $type = $this->getColumnType($column);
+            $default = $column['default'];
 
             $defaultValue = '';
 
@@ -151,7 +140,7 @@ class ResourceGenerator
 
             $output .= sprintf($this->formats['form_field'], $fieldType, $name, $label);
 
-            if (trim($defaultValue, "'\"")) {
+            if (trim((string) $defaultValue, "'\"")) {
                 $output .= "->default({$defaultValue})";
             }
 
@@ -166,7 +155,7 @@ class ResourceGenerator
         $output = '';
 
         foreach ($this->getTableColumns() as $column) {
-            $name = $column->getName();
+            $name = $column['name'];
 
             // set column label
             $label = $this->formatLabel($name);
@@ -184,7 +173,7 @@ class ResourceGenerator
         $output = '';
 
         foreach ($this->getTableColumns() as $column) {
-            $name = $column->getName();
+            $name = $column['name'];
             $label = $this->formatLabel($name);
 
             $output .= sprintf($this->formats['grid_column'], $name, $label);
@@ -205,39 +194,69 @@ class ResourceGenerator
     }
 
     /**
-     * Get columns of a giving model.
+     * Get columns of the model's table.
      *
-     * @throws \Exception
-     *
-     * @return \Doctrine\DBAL\Schema\Column[]
+     * @return array[]
      */
     protected function getTableColumns()
     {
-        if (!$this->model->getConnection()->isDoctrineAvailable()) {
-            throw new \Exception(
-                'You need to require doctrine/dbal: ~2.3 in your own composer.json to get database columns. '
-            );
+        return $this->model->getConnection()->getSchemaBuilder()->getColumns($this->model->getTable());
+    }
+
+    /**
+     * Normalize the native schema type for form field selection.
+     *
+     * @param array $column
+     *
+     * @return string
+     */
+    protected function getColumnType(array $column)
+    {
+        if (strtolower($column['type']) === 'tinyint(1)') {
+            return 'boolean';
         }
 
-        $table = $this->model->getConnection()->getTablePrefix().$this->model->getTable();
-        /** @var \Doctrine\DBAL\Schema\MySqlSchemaManager $schema */
-        $schema = $this->model->getConnection()->getDoctrineSchemaManager($table);
+        $type = strtolower($column['type_name'] ?? $column['type']);
+        $type = preg_replace('/\(.*/', '', $type);
 
-        // custom mapping the types that doctrine/dbal does not support
-        $databasePlatform = $schema->getDatabasePlatform();
-
-        foreach ($this->doctrineTypeMapping as $doctrineType => $dbTypes) {
-            foreach ($dbTypes as $dbType) {
-                $databasePlatform->registerDoctrineTypeMapping($dbType, $doctrineType);
-            }
+        switch ($type) {
+            case 'varchar':
+            case 'char':
+            case 'nvarchar':
+            case 'nchar':
+            case 'character varying':
+            case 'character':
+            case 'enum':
+                return 'string';
+            case 'int':
+            case 'int2':
+            case 'int4':
+            case 'tinyint':
+            case 'mediumint':
+                return 'integer';
+            case 'int8':
+                return 'bigint';
+            case 'numeric':
+            case 'double':
+            case 'double precision':
+                return 'decimal';
+            case 'bool':
+            case 'bit':
+                return 'boolean';
+            case 'timestamp without time zone':
+            case 'timestamp with time zone':
+            case 'timestamptz':
+            case 'datetime2':
+            case 'smalldatetime':
+                return 'datetime';
+            case 'jsonb':
+                return 'json';
+            case 'mediumtext':
+            case 'longtext':
+                return 'text';
+            default:
+                return $type;
         }
-
-        $database = null;
-        if (strpos($table, '.')) {
-            list($database, $table) = explode('.', $table);
-        }
-
-        return $schema->listTableColumns($table, $database);
     }
 
     /**

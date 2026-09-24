@@ -28,7 +28,7 @@ $form->image('picture')->name(function ($file) {
 
 ### Upload to local
 
-first add storage configuration, add a disk in `config/filesystems.php`:
+The default `admin` disk stores uploads in `public/uploads`. Set `APP_URL` to the public URL of your application. To use a different location, define an `admin` disk in `config/filesystems.php`; your configuration takes precedence over the default:
 
 ```php
 
@@ -45,7 +45,7 @@ first add storage configuration, add a disk in `config/filesystems.php`:
 
 ```
 
-set upload path to `public/upload`(public_path('upload')).
+The default upload path is `public/uploads` (`public_path('uploads')`).
 
 And then in `config/admin.php` select the `disk` set up above：
 

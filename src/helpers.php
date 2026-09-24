@@ -1,7 +1,5 @@
 <?php
 
-use Illuminate\Support\MessageBag;
-
 if (!function_exists('admin_path')) {
 
     /**
@@ -66,7 +64,7 @@ if (!function_exists('admin_base_path')) {
 if (!function_exists('admin_toastr')) {
 
     /**
-     * Flash a toastr message bag to session.
+     * Flash a toastr notification to the session.
      *
      * @param string $message
      * @param string $type
@@ -74,16 +72,14 @@ if (!function_exists('admin_toastr')) {
      */
     function admin_toastr($message = '', $type = 'success', $options = [])
     {
-        $toastr = new MessageBag(get_defined_vars());
-
-        session()->flash('toastr', $toastr);
+        session()->flash('toastr', compact('message', 'type', 'options'));
     }
 }
 
 if (!function_exists('admin_success')) {
 
     /**
-     * Flash a success message bag to session.
+     * Flash a success alert to the session.
      *
      * @param string $title
      * @param string $message
@@ -97,7 +93,7 @@ if (!function_exists('admin_success')) {
 if (!function_exists('admin_error')) {
 
     /**
-     * Flash a error message bag to session.
+     * Flash an error alert to the session.
      *
      * @param string $title
      * @param string $message
@@ -111,7 +107,7 @@ if (!function_exists('admin_error')) {
 if (!function_exists('admin_warning')) {
 
     /**
-     * Flash a warning message bag to session.
+     * Flash a warning alert to the session.
      *
      * @param string $title
      * @param string $message
@@ -125,7 +121,7 @@ if (!function_exists('admin_warning')) {
 if (!function_exists('admin_info')) {
 
     /**
-     * Flash a message bag to session.
+     * Flash an alert to the session.
      *
      * @param string $title
      * @param string $message
@@ -133,9 +129,7 @@ if (!function_exists('admin_info')) {
      */
     function admin_info($title, $message = '', $type = 'info')
     {
-        $message = new MessageBag(get_defined_vars());
-
-        session()->flash($type, $message);
+        session()->flash($type, compact('title', 'message'));
     }
 }
 
