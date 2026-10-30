@@ -15,7 +15,7 @@ $('.{{ $trigger }}').popover({
         var $trigger = $(this);
         var $template = $($('template#'+$(this).data('target')).html());
         {{ $content }}
-        return $template.prop("outerHTML");
+        return $template;
     }
 }).on('shown.bs.popover', function (e) {
 

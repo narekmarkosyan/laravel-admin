@@ -37,9 +37,9 @@ SOFTWARE.
         } else {
             throw ("Given data is not jpeg.");
         }
-        
+
         var segments = splitIntoSegments(jpeg);
-        if (segments[1].slice(0, 2) == "\xff\xe1" && 
+        if (segments[1].slice(0, 2) == "\xff\xe1" &&
                segments[1].slice(4, 10) == "Exif\x00\x00") {
             segments = [segments[0]].concat(segments.slice(2));
         } else if (segments[2].slice(0, 2) == "\xff\xe1" &&
@@ -48,7 +48,7 @@ SOFTWARE.
         } else {
             throw("Exif not found.");
         }
-        
+
         var new_data = segments.join("");
         if (b64) {
             new_data = "data:image/jpeg;base64," + btoa(new_data);
@@ -167,13 +167,13 @@ SOFTWARE.
             interop_ifd,
             gps_ifd,
             first_ifd;
-        
+
         if ("0th" in exif_dict) {
             zeroth_ifd = exif_dict["0th"];
         } else {
             zeroth_ifd = {};
         }
-        
+
         if ((("Exif" in exif_dict) && (Object.keys(exif_dict["Exif"]).length)) ||
             (("Interop" in exif_dict) && (Object.keys(exif_dict["Interop"]).length))) {
             zeroth_ifd[34665] = 1;
@@ -197,7 +197,7 @@ SOFTWARE.
         } else if (Object.keys(zeroth_ifd).indexOf(that.ImageIFD.GPSTag.toString()) > -1) {
             delete zeroth_ifd[that.ImageIFD.GPSTag];
         }
-        
+
         if (("1st" in exif_dict) &&
             ("thumbnail" in exif_dict) &&
             (exif_dict["thumbnail"] != null)) {
@@ -206,7 +206,7 @@ SOFTWARE.
             exif_dict["1st"][514] = 1;
             first_ifd = exif_dict["1st"];
         }
-        
+
         var zeroth_set = _dict_to_bytes(zeroth_ifd, "0th", 0);
         var zeroth_length = (zeroth_set[0].length + exif_is * 12 + gps_is * 12 + 4 +
             zeroth_set[1].length);
@@ -666,8 +666,8 @@ SOFTWARE.
             return output;
         };
     }
-    
-    
+
+
     if (typeof window !== "undefined" && typeof window.atob === "function") {
         var atob = window.atob;
     }
@@ -924,7 +924,7 @@ SOFTWARE.
 
 
     function mergeSegments(segments, exif) {
-        
+
         if (segments[1].slice(0, 2) == "\xff\xe0" &&
             (segments[2].slice(0, 2) == "\xff\xe1" &&
              segments[2].slice(4, 10) == "Exif\x00\x00")) {
@@ -952,7 +952,7 @@ SOFTWARE.
                 segments = [segments[0], exif].concat(segments.slice(1));
             }
         }
-        
+
         return segments.join("");
     }
 
@@ -2142,7 +2142,7 @@ SOFTWARE.
     TAGS["1st"] = TAGS["Image"];
     that.TAGS = TAGS;
 
-    
+
     that.ImageIFD = {
         ProcessingSoftware:11,
         NewSubfileType:254,
@@ -2331,7 +2331,7 @@ SOFTWARE.
         NoiseProfile:51041,
     };
 
-    
+
     that.ExifIFD = {
         ExposureTime:33434,
         FNumber:33437,
@@ -2457,8 +2457,8 @@ SOFTWARE.
             return [[deg, 1], [min, 1], [sec, 100]];
         }
     };
-    
-    
+
+
     if (typeof exports !== 'undefined') {
         if (typeof module !== 'undefined' && module.exports) {
             exports = module.exports = that;
