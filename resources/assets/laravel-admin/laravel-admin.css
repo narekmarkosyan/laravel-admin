@@ -739,6 +739,17 @@ body.login-page {
     .sidebar-mini.sidebar-collapse .sidebar-menu:focus-within {
         overflow: visible;
     }
+
+    /* PJAX keeps the sidebar in place; dismiss hover/focus flyouts on selection. */
+    .sidebar-mini.sidebar-collapse .main-sidebar .sidebar-menu > li.flyout-closed > a {
+        width: auto;
+        box-shadow: none;
+    }
+
+    .sidebar-mini.sidebar-collapse .main-sidebar .sidebar-menu > li.flyout-closed > a > span:not(.pull-right),
+    .sidebar-mini.sidebar-collapse .main-sidebar .sidebar-menu > li.flyout-closed > .treeview-menu {
+        display: none !important;
+    }
 }
 
 @media (max-width: 991px) {
